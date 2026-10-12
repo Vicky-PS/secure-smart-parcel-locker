@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Locker operations dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="eyebrow">SDG 9 secure IoT infrastructure</p>
+      <h1>Locker operations dashboard</h1>
+      <p class="source">{{ source }}</p>
+    </header>
+
+    <section class="summary-grid" aria-label="Compartment summaries">
+      {% for item in summaries %}
+      <article class="summary {% if item.has_tamper or not item.chain_valid %}danger{% endif %}">
+        <div>
+          <h2>{{ item.compartment_id }}</h2>
+          <p>{{ item.event_count }} events</p>
+        </div>
+        <dl>
+          <dt>Latest</dt>
+          <dd class="status-text">{{ item.latest_event.replace("_", " ").title().replace("Firmware Verified", "Firmware OK") }}</dd>
+          <dt>Chain</dt>
+          <dd>{{ "valid" if item.chain_valid else "invalid" }}</dd>
+          <dt>Tamper</dt>
+          <dd>{{ "detected" if item.has_tamper else "none" }}</dd>
+        </dl>
+      </article>
+      {% endfor %}
+    </section>
+
+    <section class="events" aria-label="Event log">
+      <h2>Event log</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Compartment</th>
+            <th>Event</th>
+            <th>Detail</th>
+            <th>Chain</th>
+            <th>Hash</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in events %}
+          <tr class="{% if event.event_type == 'TAMPER' or not event.chain_valid %}danger-row{% endif %}">
+            <td>{{ event.timestamp }}</td>
+            <td>{{ event.compartment_id }}</td>
+            <td>{{ event.event_type }}</td>
+            <td>{{ event.detail }}</td>
+            <td>{{ "valid" if event.chain_valid else "invalid" }}</td>
+            <td><code>{{ event.hash[:18] }}</code></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
